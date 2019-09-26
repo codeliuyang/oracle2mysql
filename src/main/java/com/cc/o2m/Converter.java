@@ -1,9 +1,9 @@
 package com.cc.o2m;
 
-import com.cc.o2m.model.OracleTable;
+import com.cc.model.TableColumn;
+import com.cc.model.Table;
 import org.junit.jupiter.api.Test;
 
-import javax.naming.event.ObjectChangeListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,7 +20,7 @@ public class Converter {
     @Test
     public void run(){
 
-        String url = "jdbc:oracle:" + "thin:@47.100.81.41:1521:xe";
+        String url = "jdbc:oracle:thin:@47.100.81.41:1521:xe";
         String username = "rsp_dev";
         String password = "rsp5938";
 
@@ -41,10 +41,10 @@ public class Converter {
             result = pre.executeQuery();
             int allTableCount = result.getMetaData().getColumnCount();
             System.out.println("一共有" + allTableCount + "张表");
-            List<OracleTable> allTableNames = new ArrayList<OracleTable>(allTableCount);
+            List<Table> allTableNames = new ArrayList<Table>(allTableCount);
             int i = 1;
             while (result.next()) {
-                OracleTable oracleTable = new OracleTable();
+                Table oracleTable = new Table();
                 String tableName = result.getString("TABLE_NAME");
                 String comment = result.getString("COMMENTS");
                 System.out.println("第" + i + "个表名称为： " + tableName + " 注释为：" + comment);
@@ -55,7 +55,7 @@ public class Converter {
             }
 
             //step2 找到每张表的信息进行DML拼凑和转换
-            for(OracleTable oracleTable: allTableNames){
+            for(Table oracleTable: allTableNames){
                 pre = con.prepareStatement("select a.TABLE_NAME, a.COLUMN_NAME, a.DATA_TYPE, a.DATA_LENGTH, a.DATA_PRECISION, a.DATA_SCALE, a.NULLABLE, b.COMMENTS " +
                         "from user_tab_columns a " +
                         "inner join user_col_comments b on a.COLUMN_NAME = b.COLUMN_NAME and a.TABLE_NAME=b.TABLE_NAME " +
@@ -64,17 +64,24 @@ public class Converter {
                 pre.setString(1, oracleTable.name);
                 result = pre.executeQuery();
 
+                List<TableColumn> oracleColumns = new ArrayList<TableColumn>();
+
                 while (result.next()) {
-                    OracleTable oracleTable = new OracleTable();
-                    String tableName = result.getString("TABLE_NAME");
-                    String comment = result.getString("COMMENTS");
-                    System.out.println("第" + i + "个表名称为： " + tableName + " 注释为：" + comment);
-                    oracleTable.name = tableName;
-                    oracleTable.comment = comment;
-                    allTableNames.add(oracleTable);
-                    i++;
+                    TableColumn oracleColumn = new TableColumn();
+                    oracleColumn.name = result.getString("COLUMN_NAME");
+                    oracleColumn.comment = result.getString("COMMENTS");
+                    oracleColumn.dataLength = result.getString("DATA_LENGTH");
+                    oracleColumn.dataPrecision = result.getString("DATA_PRECISION");
+                    oracleColumn.dataScale = result.getString("DATA_SCALE");
+                    oracleColumn.dataType = result.getString("DATA_TYPE");
+                    oracleColumn.defaultValue = "";
+                    oracleColumn.nullable = result.getString("NULLABLE");
+                    oracleColumns.add(oracleColumn);
                 }
+                oracleTable.columns = oracleColumns;
             }
+
+            System.out.println("get table data finished!");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
