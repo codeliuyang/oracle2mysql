@@ -2,6 +2,7 @@ package com.cc.o2m;
 
 import com.cc.model.TableColumn;
 import com.cc.model.Table;
+import com.cc.util.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -20,14 +21,15 @@ public class Converter {
     @Test
     public void run(){
 
-        String url = "jdbc:oracle:thin:@47.100.81.41:1521:xe";
-        String username = "rsp_dev";
-        String password = "rsp5938";
+        String url = "jdbc:oracle:thin:@";
+        String username = "";
+        String password = "";
 
         Connection con = null;
         // 创建预编译语句对象，一般都是用这个而不用Statement
         PreparedStatement pre = null;
         ResultSet result = null;
+        ResultSet result2 = null;
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
             System.out.println("Trying to connect ... ！");
@@ -40,22 +42,24 @@ public class Converter {
                     "order by table_name asc");
             result = pre.executeQuery();
             int allTableCount = result.getMetaData().getColumnCount();
+
             System.out.println("一共有" + allTableCount + "张表");
-            List<Table> allTableNames = new ArrayList<Table>(allTableCount);
+            List<Table> allTable = new ArrayList<Table>(allTableCount);
             int i = 1;
             while (result.next()) {
                 Table oracleTable = new Table();
                 String tableName = result.getString("TABLE_NAME");
                 String comment = result.getString("COMMENTS");
-                System.out.println("第" + i + "个表名称为： " + tableName + " 注释为：" + comment);
+                // System.out.println("第" + i + "个表名称为： " + tableName + " 注释为：" + comment);
                 oracleTable.name = tableName;
                 oracleTable.comment = comment;
-                allTableNames.add(oracleTable);
+                allTable.add(oracleTable);
                 i++;
             }
-
+            pre.close();
             //step2 找到每张表的信息进行DML拼凑和转换
-            for(Table oracleTable: allTableNames){
+            for(Table oracleTable: allTable){
+                // 查询表结构
                 pre = con.prepareStatement("select a.TABLE_NAME, a.COLUMN_NAME, a.DATA_TYPE, a.DATA_LENGTH, a.DATA_PRECISION, a.DATA_SCALE, a.NULLABLE, b.COMMENTS " +
                         "from user_tab_columns a " +
                         "inner join user_col_comments b on a.COLUMN_NAME = b.COLUMN_NAME and a.TABLE_NAME=b.TABLE_NAME " +
@@ -63,6 +67,20 @@ public class Converter {
                         "order by a.COLUMN_ID asc");
                 pre.setString(1, oracleTable.name);
                 result = pre.executeQuery();
+
+                // 查询主键
+                pre = pre = con.prepareStatement("select col.column_name " +
+                        "from user_constraints con,user_cons_columns col " +
+                        "where con.constraint_name=col.constraint_name and con.constraint_type='P' " +
+                        "and col.table_name= ? ");
+                pre.setString(1, oracleTable.name);
+                result2 = pre.executeQuery();
+
+                String primaryKey = "ID";
+                while (result2.next()){
+                    primaryKey = result2.getString("COLUMN_NAME");
+                }
+                // System.out.println("主键是 " + primaryKey);
 
                 List<TableColumn> oracleColumns = new ArrayList<TableColumn>();
 
@@ -76,10 +94,29 @@ public class Converter {
                     oracleColumn.dataType = result.getString("DATA_TYPE");
                     oracleColumn.defaultValue = "";
                     oracleColumn.nullable = result.getString("NULLABLE");
+
+                    if(oracleColumn.name.equalsIgnoreCase(primaryKey)){
+                        oracleColumn.primaryKey = true;
+                        oracleTable.primaryKeyColumnName = oracleColumn.name;
+                        oracleTable.primaryKeyDataType = oracleColumn.dataType;
+                    } else {
+                        oracleColumn.primaryKey = false;
+                    }
                     oracleColumns.add(oracleColumn);
                 }
                 oracleTable.columns = oracleColumns;
+                pre.close();
             }
+
+            //step3 进行转换
+            StringBuilder sb = new StringBuilder();
+            for(Table oracleTable: allTable){
+                // System.out.println("converting ...... " + oracleTable.name);
+                sb.append(oracleTable.toMySQLScript());
+            }
+
+            //step4 save to file
+            FileUtils.saveSqlScript(sb.toString());
 
             System.out.println("get table data finished!");
         } catch (Exception e) {
