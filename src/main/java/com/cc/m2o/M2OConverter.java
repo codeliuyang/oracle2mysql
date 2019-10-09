@@ -4,5 +4,5 @@ package com.cc.m2o;
  * dml
  * mysql to oracle
  */
-public class Converter {
+public class M2OConverter {
 }

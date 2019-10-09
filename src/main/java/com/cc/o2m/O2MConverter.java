@@ -3,7 +3,6 @@ package com.cc.o2m;
 import com.cc.model.TableColumn;
 import com.cc.model.Table;
 import com.cc.util.FileUtils;
-import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,14 +15,9 @@ import java.util.List;
  * dml
  * oracle to mysql
  */
-public class Converter {
+public class O2MConverter {
 
-    @Test
-    public void run(){
-
-        String url = "jdbc:oracle:thin:@";
-        String username = "";
-        String password = "";
+    public void run(String url, String username, String password){
 
         Connection con = null;
         // 创建预编译语句对象，一般都是用这个而不用Statement
@@ -116,6 +110,11 @@ public class Converter {
             }
 
             //step4 save to file
+            String scriptComment = "-- Oracle 2 MySQL \n" +
+                    "-- Database Info: \n" +
+                    "--     " + url + "\n" +
+                    "--     " + username + "\n\n\n";
+            sb.insert(0, scriptComment);
             FileUtils.saveSqlScript(sb.toString());
 
             System.out.println("get table data finished!");

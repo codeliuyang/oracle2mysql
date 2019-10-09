@@ -41,7 +41,7 @@ public class Table {
         if(StringUtils.isNotBlank(this.comment)){
             sb.append(" COMMENT='" + this.comment + "'");
         }
-        sb.append(";\n\n");
+        sb.append(";\n\n\n");
         return sb.toString();
     }
 
