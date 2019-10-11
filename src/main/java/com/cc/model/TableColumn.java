@@ -59,7 +59,7 @@ public class TableColumn {
             if(StringUtils.isNotBlank(this.dataLength)) {
                 length = Integer.valueOf(this.dataLength);
             }
-            sb.append("varchar" + "(" + length / divideChineseCharater + ") ");
+            sb.append("varchar" + "(" + length + ") ");
         } else {
             sb.append(this.dataType + "(" + this.dataLength + ") ");
         }
