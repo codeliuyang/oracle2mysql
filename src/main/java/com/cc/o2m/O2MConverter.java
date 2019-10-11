@@ -8,7 +8,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +39,7 @@ public class O2MConverter {
             result = pre.executeQuery();
             int allTableCount = result.getMetaData().getColumnCount();
 
-            System.out.println("一共有" + allTableCount + "张表");
+            // System.out.println("一共有" + allTableCount + "张表");
             List<Table> allTable = new ArrayList<Table>(allTableCount);
             int i = 1;
             while (result.next()) {
@@ -51,6 +53,22 @@ public class O2MConverter {
                 i++;
             }
             pre.close();
+
+            // 看看中文都占几个字节
+            // 如果显示SIMPLIFIED CHINESE_CHINA.ZHS16GBK，一个汉字占用两个字节;
+            // 如果显示SIMPLIFIED CHINESE_CHINA.AL32UTF8，一个汉字占用三个字节.
+            pre = con.prepareStatement("select userenv('language') as LANGUAGE from dual");
+            result = pre.executeQuery();
+            String character = "SIMPLIFIED CHINESE_CHINA.AL32UTF8";
+            Integer divideCharater = 3;
+            while (result.next()) {
+                character = result.getString("LANGUAGE");
+            }
+            System.out.println(character);
+            if("SIMPLIFIED CHINESE_CHINA.ZHS16GBK".equals(character)){
+                divideCharater = 2;
+            }
+
             //step2 找到每张表的信息进行DML拼凑和转换
             for(Table oracleTable: allTable){
                 // 查询表结构
@@ -88,6 +106,7 @@ public class O2MConverter {
                     oracleColumn.dataType = result.getString("DATA_TYPE");
                     oracleColumn.defaultValue = "";
                     oracleColumn.nullable = result.getString("NULLABLE");
+                    oracleColumn.divideChineseCharater = divideCharater;
 
                     if(oracleColumn.name.equalsIgnoreCase(primaryKey)){
                         oracleColumn.primaryKey = true;
@@ -110,7 +129,8 @@ public class O2MConverter {
             }
 
             //step4 save to file
-            String scriptComment = "-- Oracle 2 MySQL \n" +
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String scriptComment = "-- " + dateFormat.format(new Date()) + "  Oracle 2 MySQL \n" +
                     "-- Database Info: \n" +
                     "--     " + url + "\n" +
                     "--     " + username + "\n\n\n";

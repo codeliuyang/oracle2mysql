@@ -24,6 +24,8 @@ public class TableColumn {
 
     public String comment;
 
+    public volatile Integer divideChineseCharater = 3;
+
     public String toMysqlScript(){
         StringBuilder sb = new StringBuilder();
         sb.append(this.name + " ");
@@ -57,7 +59,7 @@ public class TableColumn {
             if(StringUtils.isNotBlank(this.dataLength)) {
                 length = Integer.valueOf(this.dataLength);
             }
-            sb.append("varchar" + "(" + length / 2 + ") ");
+            sb.append("varchar" + "(" + length / divideChineseCharater + ") ");
         } else {
             sb.append(this.dataType + "(" + this.dataLength + ") ");
         }
