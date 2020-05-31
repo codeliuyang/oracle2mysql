@@ -7,33 +7,39 @@
 设置对应转换器为```true```然后右键运行Main方法即可
 
 ### Oracle and MySQL Data Type Mapper
-ORACLE 和 MySQL 的版本信息
-```
-Oracle Version
-Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+ORACLE版本信息
+```sql
 select * from v$version;
+
+
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
 ```
 
-ORACLE 和 MySQL 的数据映射关系
+MySQL版本信息
+```sql
+SELECT VERSION();
+
+8.0.12
+```
+
+
+ORACLE 和 MySQL 的数据映射关系，目前仅支持常见的以下类型的映射关系
 
 | ORACLE Data Type | MySQL Data Type |
 |------------------|-----------------|
-| binary_double | double |
-| binary_float | float |
-| blob | longblob ( tinyblob / blob / mediumblob ) |
-| clob | longtext ( tinytext / text / mediumtext ) |
-| char() | char |
-| date | date |
-| interval day to second | ? |
-| interval year to month | ? |
-| long | longblob |
-| long raw | ? |
-| nclob | ? |
-| number | bigint ( tinyint / smallint / mediumint / int / integer / bigint ) |
-| nvarchar2() | varchar |
-| raw() | ? |
-| timestamp | timestamp |
-| timestamp with local time zone | ? |
-| timestamp with time zone | ? |
-| varchar2() | varchar |
+| NUMBER(3,0) | TINYINT |
+| NUMBER(5,0) | SMALLINT |
+| NUMBER(7,0) | MEDIUMINT |
+| NUMBER(10,0) | INT, INTEGER|
+| NUMBER(20,0) | BIGINT|
+| BINARY_DOUBLE, FLOAT(24) | DOUBLE |
+| BINARY_FLOAT, FLOAT | FLOAT |
+| BLOB, RAW | LONGBLOB |
+| CLOB, RAW | LONGTEXT |
+| CHAR, NCHAR | CHAR |
+| VARCHAR2, NVARCHAR2 | VARCHAR |
+| DATE | DATETIME, DATE, TIME |
+| TIMESTAMP | TIMESTAMP |
+
+
  

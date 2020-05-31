@@ -1,4 +1,4 @@
-package com.cc.model;
+package com.cc.o2m.model;
 
 import com.cc.util.DataTypeUtils;
 import org.junit.platform.commons.util.StringUtils;

@@ -5,14 +5,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cc</groupId>
-    <artifactId>dmlconverter</artifactId>
+    <artifactId>oracle2mysql</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>A custom project using myfaces</name>
-    <url>http://www.myorganization.org</url>
+    <name>oracle2mysql</name>
+    <url>https://github.com/codeliuyang/oracle2mysql</url>
 
     <build>
-        <finalName>dmlconverter</finalName>
+        <finalName>oracle2mysql</finalName>
     </build>
 
     <!-- Project dependencies -->

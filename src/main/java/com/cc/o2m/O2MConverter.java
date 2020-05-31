@@ -1,7 +1,7 @@
 package com.cc.o2m;
 
-import com.cc.model.TableColumn;
-import com.cc.model.Table;
+import com.cc.o2m.model.TableColumn;
+import com.cc.o2m.model.Table;
 import com.cc.util.FileUtils;
 
 import java.sql.Connection;
@@ -28,7 +28,7 @@ public class O2MConverter {
         ResultSet result2 = null;
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            System.out.println("Trying to connect ... ！");
+            System.out.println("Trying to connect oracle database ... ！");
             con = DriverManager.getConnection(url, username, password);
             System.out.println("Connected！");
             // step1 获取每张表的名称和注释

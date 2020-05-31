@@ -1,4 +1,4 @@
-package com.cc.model;
+package com.cc.o2m.model;
 
 
 import com.cc.util.DataTypeUtils;
@@ -39,8 +39,8 @@ public class TableColumn {
                 sb.append("tinyint" + "(" + 3 + ") ");
             } else if(precision <= 5 ){
                 sb.append("smallint" + "(" + 5 + ") ");
-            } else if(precision <=  7){
-                sb.append("mediumint" + "(" + 7 + ") ");
+            } else if(precision <= 8){
+                sb.append("mediumint" + "(" + 8 + ") ");
             } else if(precision <= 10) {
                 sb.append("integer" + "(" + 10 + ") ");
             } else {
@@ -49,18 +49,26 @@ public class TableColumn {
         } else if (this.dataType.startsWith("TIMESTAMP")) {
             sb.append("timestamp" + " ");
         } else if (this.dataType.equalsIgnoreCase("DATE")) {
-            sb.append("date" + " ");
+            sb.append("datetime" + " ");
         } else if (this.dataType.equalsIgnoreCase("DATETIME")) {
             sb.append("datetime" + " ");
         } else if (this.dataType.equalsIgnoreCase("CLOB")) {
             sb.append("longtext" + " ");
-        } else if (this.dataType.startsWith("VARCHAR")) {
+        } else if (this.dataType.contains("BLOB")) {
+            sb.append("longblob" + " ");
+        }
+        else if (this.dataType.startsWith("VARCHAR") || this.dataType.startsWith("NVARCHAR")) {
             Integer length = 18;
             if(StringUtils.isNotBlank(this.dataLength)) {
                 length = Integer.valueOf(this.dataLength);
             }
             sb.append("varchar" + "(" + length + ") ");
-        } else {
+        } else if (this.dataType.contains("FLOAT")) {
+            sb.append("float" + " ");
+        } else if (this.dataType.contains("DOUBLE")) {
+            sb.append("double" + " ");
+        }
+        else {
             sb.append(this.dataType + "(" + this.dataLength + ") ");
         }
         if ("N".equalsIgnoreCase(this.nullable)){
@@ -70,7 +78,7 @@ public class TableColumn {
             sb.append("DEFAULT '" + defaultValue + "' ");
         } else if ("Y".equalsIgnoreCase(this.nullable) && !this.primaryKey){
             if (this.dataType.startsWith("TIMESTAMP")) {
-                sb.append("NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ");
+                sb.append("DEFAULT NULL");
             } else {
                 sb.append("DEFAULT NULL ");
             }
