@@ -1,10 +1,20 @@
 # oracle2mysql
-表之间的相互转换
+表结构之间的相互转换
 
 ### How to use
 在```Application.class```中修改对应的数据库连接信息
 
 设置对应转换器为```true```然后右键运行Main方法即可
+
+最终sql输出到根目录下的```converter.sql```文件夹下
+
+### 转换的信息包括
+- 字段名
+- 字段类型，相应数据库格式，如果不支持则保留原数据库的类型（如果有不支持的类型，转换过程中不会报错，但是执行出来的sql脚本会报错）
+- 是否可为NULL
+- 默认值
+- 注释
+- 主键，Oracle转MySQL，默认MySQL主键自增长
 
 ### Oracle and MySQL Data Type Mapper
 ORACLE版本信息
